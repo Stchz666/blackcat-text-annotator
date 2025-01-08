@@ -4,11 +4,11 @@ build-backend = "pdm.backend"
 
 [project]
 # name it as your package name
-name = "quanttide-example-of-python-package"
+name = "blackcat-text-annotator"
 # semetric versions
 version = "0.1.0-alpha.1"
 # describe the package within one sentence
-description = "QuantTide Example of Python Package"
+description = "Blackcat Text Annotator"
 authors = [{name = "QuantTide Inc.", email = "opensource@quanttide.com"}]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -28,5 +28,5 @@ content-type = "text/markdown"
 
 [tool.pdm.build]
 includes = [
-    "python_package",
+    "blackcat_text_annotator",
 ]
