@@ -15,6 +15,7 @@ classifiers = [
 ]
 requires-python = '>=3.9'
 dependencies = [
+    "pydantic-ai>=0.0.18"
 ]
 # dynamic = ["version"]
 
