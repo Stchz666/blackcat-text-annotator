@@ -1,0 +1,10 @@
+{
+  "normal_cases": [
+    {"text": "Python机器学习", "expected": ["Python"]},
+    {"text": "Golang微服务", "expected": ["Go"]}
+  ],
+  "edge_cases": [
+    {"text": "", "expected": ["None"]},
+    {"text": "PythonPythonPython", "expected": ["Python"]}
+  ]
+}

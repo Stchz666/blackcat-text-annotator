@@ -29,18 +29,26 @@ class LanguageLabeler(BaseTextLabeler):
         """原子化关键词添加操作"""
         with self._lock:
             for lang, aliases in config.items():
-                self.processor.add_keyword(lang)
+                # 同时添加主语言名和别名
+                self.processor.add_keyword(f"{lang}")  # 主名称
+                self.processor.add_keyword(f"{lang}/{lang}")  # 用于精确匹配
                 for alias in aliases:
-                    self.processor.add_keyword(alias)
+                    self.processor.add_keyword(f"{lang}/{alias}")  # 别名映射
 
     def add_language(self, lang: str, aliases: Iterable[str] = ()):
         """动态添加新语言"""
         self._add_keywords({lang: set(aliases)})
-        self.config[lang] = aliases
+        self.config[lang] = set(aliases)
 
     def label(self, texts: Iterable[str]) -> List[str]:
         def process(text: str):
-            found = {kw.split('/')[0] for kw in self.processor.extract_keywords(text)}
-            return ','.join(sorted(found)) if found else 'None'
+            # 提取所有匹配的关键词并去重
+            keywords = set()
+            for kw in self.processor.extract_keywords(text):
+                if '/' in kw:
+                    keywords.add(kw.split('/')[0])  # 提取主语言名
+                else:
+                    keywords.add(kw)
+            return ','.join(sorted(keywords)) if keywords else 'None'
 
         return [process(text) for text in texts]
