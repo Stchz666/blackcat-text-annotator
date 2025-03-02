@@ -2,33 +2,32 @@ import unittest
 from threading import Thread
 from blackcat_text_annotator.language_labeler import LanguageLabeler
 
-
 class TestLanguageLabeler(unittest.TestCase):
     def setUp(self):
         self.labeler = LanguageLabeler()
 
-    def test_基础功能(self):
-        测试数据 = [
+    def test_basic_functionality(self):
+        test_data = [  # 测试数据保持不变
             ("python", {"Python"}),
             ("C/C++开发", {"C", "C++"}),
             ("GOLANG工程师", {"Go"}),
             ("", set())
         ]
-        for 输入, 预期 in 测试数据:
-            with self.subTest(输入=输入):
-                结果 = set(self.labeler.label([输入])[0].split(','))
-                self.assertEqual(结果, 预期 if 预期 else {'None'})
+        for input_str, expected in test_data:
+            with self.subTest(input=input_str):  # 保持subTest的测试标识
+                result = set(self.labeler.label([input_str])[0].split(','))
+                self.assertEqual(result, expected if expected else {'None'})
 
-    def test_动态扩展(self):
+    def test_dynamic_extension(self):
         self.labeler.add_language('Rust', ['rs'])
         self.assertIn('Rust', self.labeler.label(['rs项目'])[0])
 
-    def test_线程安全(self):
-        def 并发添加():
+    def test_thread_safety(self):
+        def concurrent_adding():  # 并发添加的测试方法
             for i in range(100):
                 self.labeler.add_language(f'Lang{i}', [f'l{i}'])
 
-        threads = [Thread(target=并发添加) for _ in range(5)]
+        threads = [Thread(target=concurrent_adding) for _ in range(5)]
         for t in threads: t.start()
         for t in threads: t.join()
 
