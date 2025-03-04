@@ -1,54 +1,30 @@
-from typing import List, Dict, Iterable
-from threading import Lock
-from flashtext import KeywordProcessor
-from .base_labeler import BaseTextLabeler
+import re
 
+class LanguageLabeler:
+    # 调整后的映射配置（注意C++的别名）
+    mapping = {
+        'Python': {'py', 'python'},
+        'Java': {'java'},
+        'C': {'c'},
+        'C++': {'cpp', 'c++', 'cplusplus'},
+        'Go': {'go', 'golang'}
+    }
 
-class LanguageLabeler(BaseTextLabeler):
-    """支持动态扩展的线程安全标注器"""
-
-    @property
-    def default_config(self) -> Dict:
-        return {
-            'Python': {'py'},
-            'Java': set(),
-            'C': set(),
-            'C++': {'cpp'},
-            'Go': {'golang'}
+    def __init__(self):
+        # 预处理：语言关键词转为小写集合
+        self.keywords = {
+            lang: {kw.lower() for kw in keywords}
+            for lang, keywords in self.mapping.items()
         }
 
-    def __init__(self, config: Dict = None):
-        self._lock = Lock()
-        super().__init__(config)
-
-    def _init_processor(self):
-        self.processor = KeywordProcessor(case_sensitive=False)
-        self._add_keywords(self.config)
-
-    def _add_keywords(self, config: Dict):
-        """原子化关键词添加操作"""
-        with self._lock:
-            for lang, aliases in config.items():
-                # 同时添加主语言名和别名
-                self.processor.add_keyword(f"{lang}")  # 主名称
-                self.processor.add_keyword(f"{lang}/{lang}")  # 用于精确匹配
-                for alias in aliases:
-                    self.processor.add_keyword(f"{lang}/{alias}")  # 别名映射
-
-    def add_language(self, lang: str, aliases: Iterable[str] = ()):
-        """动态添加新语言"""
-        self._add_keywords({lang: set(aliases)})
-        self.config[lang] = set(aliases)
-
-    def label(self, texts: Iterable[str]) -> List[str]:
-        def process(text: str):
-            # 提取所有匹配的关键词并去重
-            keywords = set()
-            for kw in self.processor.extract_keywords(text):
-                if '/' in kw:
-                    keywords.add(kw.split('/')[0])  # 提取主语言名
-                else:
-                    keywords.add(kw)
-            return ','.join(sorted(keywords)) if keywords else 'None'
-
-        return [process(text) for text in texts]
+    def label(self, texts):
+        results = []
+        for text in texts:
+            # 使用正则提取所有字母数字（保留C++中的+号）
+            words = re.findall(r'[a-z0-9+]+', text.lower())  # 修改行
+            matches = []
+            for lang in self.mapping:
+                if any(kw in words for kw in self.keywords[lang]):
+                    matches.append(lang)
+            results.append(', '.join(matches) or 'None')
+        return results

@@ -1,27 +1,22 @@
 from blackcat_text_annotator.language_labeler import LanguageLabeler
 
-def demo_labeler_capability(labeler: LanguageLabeler):
-    # 测试数据包含不同大小写和组合形式
-    test_cases = [
-        "Python开发需要掌握C/C++基础",
-        "GO和GOLANG有什么区别",
-        "JAVA工程师招聘",
-        "无关文本"
+def main():
+    lang_labeler = LanguageLabeler()
+
+    lang_samples = [
+        "Python and Java are popular languages",
+        "I prefer C++ over C",
+        "Golang is also called Go",
+        "Ruby on Rails framework"
     ]
 
-    # 执行标注并展示结果
-    print("标注结果：")
-    for text, label in zip(test_cases, labeler.label(test_cases)):
-        print(f"[{label}]\t{text}")
-
+    print("===== 语言标注结果 =====")
+    for i, text in enumerate(lang_samples):
+        results = lang_labeler.label([text])
+        print(f"文本{i+1}: {text} → {results[0]}")
 
 if __name__ == '__main__':
-    print("=== 基础版 ===")
-    basic_labeler = LanguageLabeler()
-    demo_labeler_capability(basic_labeler)
+    main()
 
-    print("\n=== 扩展版 ===")
-    extended_labeler = LanguageLabeler()
-    extended_labeler.add_language('JavaScript', ['js', 'ES6'])
-    extended_labeler.add_language('Rust', ['rs'])
-    demo_labeler_capability(extended_labeler)
+
+
